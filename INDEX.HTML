@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Utility Hub — Tools & Study Hacks</title>
+  <meta name="description" content="GPA & attendance calculators, study hacks, career guidance — lightweight, fast, and student-focused." />
+  <meta name="theme-color" content="#2B6FF5" />
+
+  <style>
+    /* ------------------ Reset & Globals ------------------ */
+    :root{
+      --bg-1: #0f172a;     /* deep navy */
+      --glass: rgba(255,255,255,0.06);
+      --muted: #9aa7d1;
+      --accent: linear-gradient(135deg,#6a11cb 0%,#2575fc 100%);
+      --card: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.04);
+      --success: #22c55e;
+      --danger: #ef4444;
+      --glass-border: rgba(255,255,255,0.06);
+      --glass-blur: 8px;
+      --max-width: 1100px;
+      --radius: 14px;
+      --glass-weak: rgba(255,255,255,0.02);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(103,58,183,0.18), transparent),
+                  radial-gradient(800px 500px at 90% 90%, rgba(37,117,252,0.12), transparent),
+                  var(--bg-1);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:40px 20px;
+      display:flex;justify-content:center;align-items:flex-start;
+    }
+
+    .wrap{width:100%;max-width:var(--max-width);}
+
+    /* ------------------ Main Card ------------------ */
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid var(--glass-border);
+      border-radius:calc(var(--radius) + 6px);
+      padding:28px;backdrop-filter: blur(var(--glass-blur));
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    }
+
+    /* ------------------ Hero / Intro ------------------ */
+    .hero{display:flex;gap:28px;align-items:center}
+    .intro{flex:1}
+    .kicker{
+      display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      color:var(--muted);font-weight:600;font-size:13px;margin-bottom:12px
+    }
+    h1{font-size:26px;line-height:1.05;margin:0 0 8px;color:#fff}
+    p.lead{color:var(--muted);margin:0 0 18px;font-size:15px}
+
+    .cta-row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{cursor:pointer;padding:10px 14px;border-radius:12px;border:0;font-weight:700}
+    .primary{background:var(--accent);color:white;box-shadow:0 8px 20px rgba(37,117,252,0.12);}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+    /* Hero visual */
+    .visual{width:380px;max-width:40%;min-width:260px}
+    .mock{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 8px 22px rgba(2,6,23,0.5);
+      transform: translateY(0); transition: transform .45s cubic-bezier(.2,.9,.2,1);
+    }
+    .mock:hover{transform:translateY(-8px)}
+
+    /* small cards grid */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+    .small-card{background:var(--card);padding:12px;border-radius:10px;border:1px solid var(--glass-border);}
+    .small-card h4{margin:0 0 6px;font-size:14px}
+    .small-card p{margin:0;color:var(--muted);font-size:13px}
+
+    /* ------------------ Sections ------------------ */
+    .section{margin-top:22px}
+    .section-grid{display:grid;grid-template-columns:1fr 420px;gap:22px}
+
+    /* left column tools */
+    .tools{background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent); padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+
+    /* calculators */
+    .calc-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);margin-bottom:14px}
+    .calc-card h3{margin:0 0 10px;color:#fff}
+    .row{display:flex;gap:10px}
+    .row .field{flex:1}
+    input[type=number], input[type=text], select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);background:transparent;color:#eaf2ff}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+
+    .controls{display:flex;gap:8px;margin-top:10px}
+
+    .result-box{margin-top:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);color:#eaf2ff}
+
+    /* animated progress */
+    .progress-wrap{background:rgba(255,255,255,0.03);border-radius:999px;padding:6px}
+    .progress{height:12px;border-radius:999px;background:linear-gradient(90deg,#2dd4bf 0%, #60a5fa 100%);width:0;transition:width 950ms cubic-bezier(.2,.9,.2,1)}
+
+    /* right column - content area */
+    .content-panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .section-title{display:flex;align-items:center;gap:10px}
+    .section-title h3{margin:0}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .card h4{margin:0 0 8px}
+    .card p{margin:0;color:var(--muted);font-size:14px}
+
+    /* floating nav (no header/footer) */
+    .float-nav{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:10px}
+    .nav-dot{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#6a11cb,#2575fc);display:flex;align-items:center;justify-content:center;color:white;cursor:pointer;box-shadow:0 8px 20px rgba(37,117,252,.14);border:1px solid rgba(255,255,255,.06)}
+    .nav-dot[title]{font-weight:700}
+
+    /* small responsive tweaks */
+    @media (max-width:980px){
+      .section-grid{grid-template-columns:1fr}
+      .visual{display:none}
+      .grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:560px){
+      body{padding:20px}
+      h1{font-size:20px}
+      .grid{grid-template-columns:1fr}
+      .wrap{padding:6px}
+      .mock{padding:10px}
+    }
+
+    /* micro animations */
+    .fade-in{opacity:0;transform:translateY(8px);animation:fadeIn .6s forwards}
+    @keyframes fadeIn{to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="panel fade-in" role="main">
+
+      <section class="hero" aria-labelledby="title">
+        <div class="intro">
+          <div class="kicker">Student Utility • Built for learners</div>
+          <h1 id="title">Smart Student Hub — Tools, Hacks & Guidance</h1>
+          <p class="lead">Fast, private, lightweight tools: GPA & attendance calculators, study hacks, career tips — all in one single page. No accounts, no tracking.</p>
+
+          <div class="cta-row">
+            <button class="btn primary" onclick="scrollToSection('tools')">Open Tools</button>
+            <button class="btn ghost" onclick="scrollToSection('hacks')">Study Hacks</button>
+          </div>
+
+          <div class="grid" style="margin-top:18px">
+            <div class="small-card">
+              <h4>Instant GPA</h4>
+              <p>Calculate GPAs quickly with weighted credits.</p>
+            </div>
+            <div class="small-card">
+              <h4>Attendance</h4>
+              <p>See your percent and classes needed for target attendance.</p>
+            </div>
+            <div class="small-card">
+              <h4>Study Hacks</h4>
+              <p>Short, proven techniques to boost retention and focus.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="visual">
+          <div class="mock" aria-hidden="true">
+            <!-- small mock UI preview -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div style="width:64px;height:24px;border-radius:8px;background:linear-gradient(90deg,#a78bfa,#60a5fa)"></div>
+              <div style="font-size:12px;color:var(--muted)">Student Hub</div>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;margin-bottom:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-size:12px;color:var(--muted)">GPA</div>
+                  <div style="font-weight:800;font-size:22px">8.24</div>
+                </div>
+                <div style="width:70px;height:70px;border-radius:10px;background:linear-gradient(90deg,#22c55e,#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:800">75%</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center">
+              <div style="flex:1;background:rgba(255,255,255,0.01);padding:8px;border-radius:8px"> <div style="font-size:12px;color:var(--muted)">Attendance</div><div style="font-weight:700">76%</div></div>
+              <div style="width:80px;background:rgba(255,255,255,0.01);padding:8px;border-radius:8px"><div style="font-size:12px;color:var(--muted)">Next</div><div style="font-weight:700">3 cls</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ----------------- Tools & Content Section ----------------- -->
+      <section id="tools" class="section">
+        <div class="section-grid">
+          <!-- left: tools -->
+          <div class="tools" aria-labelledby="tools-title">
+            <div class="calc-card" id="gpa-card">
+              <h3 id="tools-title">GPA / CGPA Calculator</h3>
+
+              <div id="subjectList">
+                <div class="row" style="margin-bottom:8px">
+                  <div class="field">
+                    <label>Credits</label>
+                    <input type="number" min="0" step="0.5" class="credits" placeholder="e.g. 3" />
+                  </div>
+                  <div class="field">
+                    <label>Grade (scale 0 - 10)</label>
+                    <input type="number" min="0" max="10" step="0.1" class="grade" placeholder="e.g. 8" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="controls">
+                <button class="btn ghost" onclick="addSubject()">➕ Add Subject</button>
+                <button class="btn primary" onclick="computeGPA()">Calculate</button>
+              </div>
+
+              <div id="gpaResult" class="result-box" aria-live="polite" style="display:none"></div>
+            </div>
+
+            <div class="calc-card" id="att-card">
+              <h3>Attendance Calculator</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div>
+                  <label>Total classes held</label>
+                  <input type="number" min="0" id="totalClasses" placeholder="e.g. 100" />
+                </div>
+                <div>
+                  <label>Classes attended</label>
+                  <input type="number" min="0" id="attendedClasses" placeholder="e.g. 76" />
+                </div>
+              </div>
+
+              <div style="margin-top:8px">
+                <label>Target %</label>
+                <input type="number" id="targetPerc" value="75" min="0" max="100" />
+              </div>
+
+              <div class="controls">
+                <button class="btn ghost" onclick="clearAttendance()">Reset</button>
+                <button class="btn primary" onclick="computeAttendance()">Check</button>
+              </div>
+
+              <div id="attResult" class="result-box" style="display:none"></div>
+            </div>
+
+            <div class="calc-card" id="converter-card">
+              <h3>Grade ↔ Percentage Converter</h3>
+              <div class="row">
+                <div class="field">
+                  <label>GPA / Grade (0 - 10)</label>
+                  <input type="number" id="inpGrade" step="0.01" min="0" max="10" placeholder="8.0" />
+                </div>
+                <div class="field">
+                  <label>Equivalent %</label>
+                  <input type="text" id="outPerc" readonly />
+                </div>
+              </div>
+              <div class="controls">
+                <button class="btn primary" onclick="convertGrade()">Convert</button>
+                <button class="btn ghost" onclick="clearConverter()">Clear</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- right: content guidance & hacks -->
+          <aside class="content-panel" aria-labelledby="content-title">
+            <div class="section-title"><h3 id="content-title">Study Hacks & Guidance</h3></div>
+
+            <div class="cards">
+              <article class="card">
+                <h4>Pomodoro & focused sprints</h4>
+                <p>Work 25 minutes, break 5 — repeat. Use short sprints to avoid burnout and increase retention.</p>
+              </article>
+
+              <article class="card">
+                <h4>Active recall</h4>
+                <p>Test yourself frequently rather than re-reading notes. Use short quizzes or flashcards.</p>
+              </article>
+
+              <article class="card">
+                <h4>Project-based learning</h4>
+                <p>Convert theory into tiny projects — building small apps or automations cements knowledge.</p>
+              </article>
+
+              <article class="card">
+                <h4>Resume & Internship tips</h4>
+                <p>Maintain a projects list with links, write short case-study bullets, and tailor each resume to the role.</p>
+              </article>
+
+            </div>
+
+            <div style="margin-top:12px">
+              <h4 style="margin:0 0 8px">Quick links</h4>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn ghost" onclick="copyTemplate()">Copy Resume Template</button>
+                <button class="btn ghost" onclick="shareSite()">Share</button>
+              </div>
+            </div>
+
+          </aside>
+        </div>
+      </section>
+
+      <!-- extra section for tips that user asked earlier -->
+      <section id="hacks" class="section">
+        <div class="section-title"><h3>More Study Hacks</h3></div>
+        <div class="cards" style="margin-top:12px">
+          <div class="card"><h4>Feynman Technique</h4><p>Explain concepts in simple language — teach a friend (or a rubber duck).</p></div>
+          <div class="card"><h4>Spaced Repetition</h4><p>Schedule reviews of material at increasing intervals to strengthen memory.</p></div>
+          <div class="card"><h4>Minimal Notes</h4><p>Make short, searchable notes — switch to digital tools like Notion or Obsidian when convenient.</p></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Floating nav (not a header/footer) -->
+  <div class="float-nav" aria-hidden="false">
+    <div class="nav-dot" title="Open Tools" onclick="scrollToSection('tools')">🔧</div>
+    <div class="nav-dot" title="Study Hacks" onclick="scrollToSection('hacks')">💡</div>
+    <div class="nav-dot" title="Top" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️</div>
+  </div>
+
+  <script>
+    /* ------------------ Utility JS ------------------ */
+    function scrollToSection(id){
+      const el=document.getElementById(id);
+      if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('fade-in');setTimeout(()=>el.classList.remove('fade-in'),800)}
+    }
+
+    // GPA logic
+    function addSubject(){
+      const list=document.getElementById('subjectList');
+      const div=document.createElement('div');
+      div.className='row';
+      div.style.marginBottom='8px';
+      div.innerHTML = `
+        <div class="field">
+          <label>Credits</label>
+          <input type="number" min="0" step="0.5" class="credits" placeholder="e.g. 3">
+        </div>
+        <div class="field">
+          <label>Grade (0-10)</label>
+          <input type="number" min="0" max="10" step="0.1" class="grade" placeholder="e.g. 8">
+        </div>
+      `;
+      list.appendChild(div);
+    }
+
+    function computeGPA(){
+      const credits=document.getElementsByClassName('credits');
+      const grades=document.getElementsByClassName('grade');
+      let totalCredits=0, weighted=0;
+      for(let i=0;i<credits.length;i++){
+        const c=parseFloat(credits[i].value);
+        const g=parseFloat(grades[i].value);
+        if(!isNaN(c) && !isNaN(g)){
+          totalCredits+=c; weighted += c * g;
+        }
+      }
+      const res=document.getElementById('gpaResult');
+      if(totalCredits<=0){res.style.display='block';res.textContent='⚠️ Enter valid credits and grades.';return}
+      const gpa=(weighted/totalCredits).toFixed(2);
+      res.style.display='block';
+      res.innerHTML=`<strong>GPA:</strong> ${gpa} <div style="margin-top:8px"><div class='progress-wrap'><div class='progress' id='gpaBar' style='width:0%'></div></div></div>`;
+      // animate bar where 10 -> 100%
+      const pct = Math.min(100, Math.round((gpa/10)*100));
+      requestAnimationFrame(()=>{document.getElementById('gpaBar').style.width = pct + '%'});
+    }
+
+    // Attendance
+    function computeAttendance(){
+      const total = parseFloat(document.getElementById('totalClasses').value);
+      const attended = parseFloat(document.getElementById('attendedClasses').value);
+      const target = parseFloat(document.getElementById('targetPerc').value) || 75;
+      const out = document.getElementById('attResult');
+      if(isNaN(total) || isNaN(attended) || total<=0 || attended<0 || attended>total){out.style.display='block';out.textContent='⚠️ Enter valid class numbers.';return}
+      const perc = ((attended/total)*100).toFixed(2);
+      // if percent >= target -> safe, else calculate how many consecutive classes to attend required
+      let message = `Current attendance: ${perc}%`;
+      if(perc >= target){ message += ' ✅ You have reached the target.' }
+      else{
+        // solution: find smallest x such that (attended + x)/(total + x) >= target/100
+        const T = target/100;
+        // (attended + x) >= T*(total + x) => attended + x >= T*total + T*x => x - T*x >= T*total - attended => x*(1-T) >= T*total - attended
+        const need = Math.ceil((T*total - attended) / (1-T));
+        message += ` ⚠️ You need to attend at least ${need} more classes in a row to reach ${target}%`;
+      }
+      out.style.display='block';out.innerHTML = message + `<div style='margin-top:8px' class='progress-wrap'><div class='progress' id='attBar' style='width:0%'></div></div>`;
+      const pct = Math.min(100, Math.round((perc)));
+      requestAnimationFrame(()=>{document.getElementById('attBar').style.width = pct + '%'});
+    }
+
+    function clearAttendance(){document.getElementById('totalClasses').value='';document.getElementById('attendedClasses').value='';document.getElementById('attResult').style.display='none'}
+
+    // Converter
+    function convertGrade(){
+      const g = parseFloat(document.getElementById('inpGrade').value);
+      const out = document.getElementById('outPerc');
+      if(isNaN(g) || g<0){out.value='Invalid';return}
+      // simple linear scale 0-10 -> 0-100
+      const p = Math.round((g/10)*100);
+      out.value = p + '%';
+    }
+    function clearConverter(){document.getElementById('inpGrade').value='';document.getElementById('outPerc').value=''}
+
+    // small utilities
+    function copyTemplate(){
+      const template = `Name:\nEmail:\nProjects:\nSkills:\nEducation:`;
+      navigator.clipboard?.writeText(template).then(()=>alert('Resume template copied to clipboard'))
+    }
+    function shareSite(){
+      if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(()=>alert('Share cancelled'))}
+      else{navigator.clipboard?.writeText(location.href).then(()=>alert('Link copied'))}
+    }
+
+    /* accessibility: allow Enter to trigger calculate in GPA and converter */
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        const active = document.activeElement;
+        if(active && active.closest && active.closest('#gpa-card')) computeGPA();
+        if(active && active.id === 'inpGrade') convertGrade();
+      }
+    })
+
+    // initial demo subjects
+    addSubject();addSubject();
+    // prefill sample values for faster testing
+    const gCredits = document.querySelectorAll('.credits');
+    const gGrades = document.querySelectorAll('.grade');
+    if(gCredits[0]){gCredits[0].value='3';gGrades[0].value='8';}
+    if(gCredits[1]){gCredits[1].value='4';gGrades[1].value='7.5';}
+
+  </script>
+</body>
+</html>
